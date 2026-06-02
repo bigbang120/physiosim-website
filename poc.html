@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///C:/Users/ph0eb/Downloads/physiosim_poc_2.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PhysioSim — Proof of Concept</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,600;1,600&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
 
   :root {
     --green:     #00A550;
     --green-d:   #007A3D;
     --green-p:   #E6F5EE;
+    --green2:    #10B981;
+    --greenPale: #D1FAE5;
     --black:     #0A0A0A;
     --dark:      #111111;
     --dark2:     #1A1A1A;
@@ -18,27 +19,14 @@
     --cyan:      #06B6D4;
     --cyan2:     #22D3EE;
     --cyanPale:  #CFFAFE;
-    --white:     #FFFFFF;
-    --off:       #F8FAFC;
-    --ink2:      #334155;
-    --muted:     #64748B;
-    --border:    #E2E8F0;
-    --green2:    #10B981;
-    --greenPale: #D1FAE5;
-    --amber:     #F59E0B;
-    --serif:     'Lora', Georgia, serif;
-    --mono:      'IBM Plex Mono', 'Courier New', monospace;
-    --sans:      'Inter', system-ui, sans-serif;
-  }
-    --dark2:     #1A1A1A;
+    --teal:      #0891B2;
+    --amber:     #D97706;
+    --red:       #DC2626;
     --white:     #FFFFFF;
     --off:       #F9F9F9;
     --ink2:      #2C2C2C;
     --muted:     #6B6B6B;
     --border:    #E0E0E0;
-    --teal:      #0891B2;
-    --amber:     #D97706;
-    --red:       #DC2626;
     --serif:     'DM Serif Display', Georgia, serif;
     --mono:      'DM Mono', 'Courier New', monospace;
     --sans:      'DM Sans', system-ui, sans-serif;
@@ -752,10 +740,10 @@
     <svg class="chart-svg" viewBox="0 0 900 200" preserveAspectRatio="none">
       <!-- Baseline IQR band -->
       <defs>
-        <lineargradient id="bandGrad" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#00A550" stop-opacity="0.12"></stop>
           <stop offset="100%" stop-color="#00A550" stop-opacity="0.04"></stop>
-        </lineargradient>
+        </linearGradient>
       </defs>
       <!-- IQR shaded band (32.56 to 32.94+0.38=33.32 → mapped to px) -->
       <!-- y range: 32.4 to 33.9 → 200px. 33.32 → y=38, 32.56 → y=137 -->
