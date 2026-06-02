@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhysioSim Systems — Individualized Physiological Baseline Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Epilogue:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+--bg: #f7f6f1;
+--bg2: #eeeae0;
+ /* Lighten the primary ink colors for better readability */
+ --ink: #1a2e23;
+ --ink2: #506a58;
+ --ink3: #90a499;
+--green: #0d5c32;
+--green-light: #1a7a44;
+--green-pale: #d6efe2;
+--red: #c0392b;
+--red-pale: #fbeae8;
+--yellow: #e6a817;
+--yellow-pale: #fdf3db;
+--border: #d4cfc3;
+--border-dark: #b5ae9f;
+--serif: 'Instrument Serif', serif;
+--mono: 'IBM Plex Mono', monospace;
+--sans: 'Epilogue', sans-serif;
+--shadow: 0 2px 24px rgba(14,26,19,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); overflow-x: hidden; }
+
+/* NOISE TEXTURE */
+body::after {
+content: '';
+position: fixed;
+inset: 0;
+background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+pointer-events: none;
+z-index: 1000;
+opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+display: flex; align-items: center; justify-content: space-between;
+padding: 0 48px; height: 64px;
+background: rgba(247,246,241,0.92);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid var(--border);
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo svg { width: 28px; height: 28px; }
+.nav-logo-text { font-family: var(--sans); font-weight: 800; font-size: 0.95rem; color: var(--ink); letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { color: var(--ink2); text-decoration: none; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em; transition: color 0.2s; }
+.nav-links a:hover { color: var(--green); }
+.nav-actions { display: flex; gap: 10px; }
+.btn-sm { padding: 8px 20px; font-family: var(--sans); font-weight: 700; font-size: 0.8rem; cursor: pointer; border: none; transition: all 0.2s; letter-spacing: 0.02em; }
+.btn-sm-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border-dark); }
+.btn-sm-ghost:hover { border-color: var(--green); color: var(--green); }
+.btn-sm-solid { background: var(--green); color: #fff; }
+.btn-sm-solid:hover { background: var(--green-light); }
+
+/* ── PAGE SECTIONS ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HERO ── */
+.hero {
+min-height: 100vh;
+display: grid;
+grid-template-columns: 1fr 1fr;
+padding-top: 64px;
+}
+.hero-left {
+padding: 80px 56px 80px 56px;
+display: flex; flex-direction: column; justify-content: center;
+border-right: 1px solid var(--border);
+}
+.hero-eyebrow {
+display: inline-flex; align-items: center; gap: 8px;
+font-family: var(--mono); font-size: 0.72rem; color: var(--green);
+border: 1px solid var(--green-pale); background: var(--green-pale);
+padding: 5px 12px; margin-bottom: 28px; width: fit-content;
+}
+.hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+font-family: var(--serif);
+font-size: clamp(2.6rem, 4.5vw, 4rem);
+line-height: 1.08;
+letter-spacing: -0.01em;
+animation: fadeUp 0.7s ease both;
+}
+.hero h1 em { font-style: italic; color: var(--green); }
+.hero-sub {
+margin-top: 24px; font-size: 1rem; color: var(--ink2); line-height: 1.75;
+max-width: 480px; animation: fadeUp 0.7s 0.1s ease both;
+}
+.hero-disclaimer {
+margin-top: 16px;
+font-family: var(--mono); font-size: 0.7rem; color: var(--ink3);
+border-left: 2px solid var(--border); padding-left: 12px;
+animation: fadeUp 0.7s 0.15s ease both;
+}
+.hero-actions {
+display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px;
+animation: fadeUp 0.7s 0.2s ease both;
+}
+.btn-primary {
+background: var(--green); color: #fff; border: none;
+padding: 14px 32px; font-family: var(--sans); font-weight: 700;
+font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--green-light); transform: translateY(-1px); }
+.btn-outline {
+background: transparent; color: var(--ink); border: 1px solid var(--border-dark);
+padding: 14px 32px; font-family: var(--sans); font-weight: 600;
+font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+}
+.btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+.hero-right {
+background: var(--ink);
+padding: 56px 48px;
+display: flex; flex-direction: column; justify-content: center;
+position: relative; overflow: hidden;
+}
+.hero-right::before {
+content: '';
+position: absolute; top: -100px; right: -100px;
+width: 400px; height: 400px;
+background: radial-gradient(circle, rgba(13,92,50,0.4) 0%, transparent 70%);
+pointer-events: none;
+}
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.stat-block {
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(255,255,255,0.08);
+padding: 28px 24px;
+transition: background 0.3s;
+}
+.stat-block:hover { background: rgba(255,255,255,0.07); }
+.stat-num {
+font-family: var(--serif); font-size: 2.8rem; color: #a8e6c3;
+line-height: 1;
+}
+.stat-unit { font-size: 1.4rem; }
+.stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 8px; line-height: 1.4; }
+.stat-source { font-family: var(--mono); font-size: 0.62rem; color: rgba(255,255,255,0.25); margin-top: 6px; }
+
+.hero-workflow {
+margin-top: 32px;
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(255,255,255,0.08);
+padding: 20px 24px;
+}
+.workflow-label { font-family: var(--mono); font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.workflow-steps { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.workflow-step {
+font-family: var(--mono); font-size: 0.72rem; color: #a8e6c3;
+background: rgba(13,92,50,0.3); border: 1px solid rgba(13,92,50,0.4);
+padding: 6px 12px;
+}
+.workflow-arrow { color: rgba(255,255,255,0.2); padding: 0 6px; font-size: 0.8rem; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── PROBLEM SECTION ── */
+.section { padding: 96px 56px; }
+.section-alt { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section-dark { background: var(--ink); color: #fff; }
+
+.label {
+font-family: var(--mono); font-size: 0.7rem; color: var(--green);
+letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px;
+}
+.label-light { color: #a8e6c3; }
+.section-title { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 3rem); line-height: 1.1; max-width: 720px; }
+.section-title em { font-style: italic; color: var(--green); }
+.section-title-light em { color: #a8e6c3; }
+
+.problem-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: 52px; }
+.problem-card {
+background: #fff; border: 1px solid var(--border);
+padding: 36px 32px; position: relative; overflow: hidden;
+transition: box-shadow 0.3s;
+}
+.problem-card:hover { box-shadow: var(--shadow); }
+.problem-card::before {
+content: '';
+position: absolute; top: 0; left: 0; right: 0; height: 3px;
+background: var(--green);
+}
+.problem-card h3 { font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
+.problem-card p { font-size: 0.88rem; color: var(--ink2); line-height: 1.7; }
+
+/* ── HOW IT WORKS ── */
+.steps-list { margin-top: 52px; display: flex; flex-direction: column; gap: 2px; }
+.step-row {
+display: grid; grid-template-columns: 72px 1fr;
+background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+transition: background 0.3s;
+}
+.step-row:hover { background: rgba(255,255,255,0.07); }
+.step-num {
+font-family: var(--serif); font-size: 2.4rem; color: rgba(255,255,255,0.12);
+padding: 24px 20px; border-right: 1px solid rgba(255,255,255,0.07);
+display: flex; align-items: center; justify-content: center;
+}
+.step-content { padding: 24px 28px; }
+.step-content h3 { font-weight: 700; font-size: 0.95rem; color: #fff; margin-bottom: 6px; }
+.step-content p { font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.7; }
+
+/* ── SOLUTION ── */
+.solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 52px; align-items: start; }
+.solution-features { display: flex; flex-direction: column; gap: 20px; }
+.feature-item {
+display: flex; gap: 16px; padding: 20px;
+border: 1px solid var(--border); background: #fff;
+transition: border-color 0.2s, box-shadow 0.2s;
+}
+.feature-item:hover { border-color: var(--green); box-shadow: var(--shadow); }
+.feature-icon {
+width: 36px; height: 36px; background: var(--green-pale);
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0; font-size: 1rem;
+}
+.feature-text h4 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+.feature-text p { font-size: 0.82rem; color: var(--ink2); line-height: 1.6; }
+
+.important-note {
+background: var(--green-pale); border: 1px solid var(--green);
+padding: 20px 24px; margin-top: 20px;
+}
+.important-note p { font-size: 0.85rem; color: var(--green); font-weight: 600; line-height: 1.6; }
+
+/* ── DEMO ── */
+.demo-container { margin-top: 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.terminal {
+background: #0a0f0c; border: 1px solid rgba(255,255,255,0.1);
+font-family: var(--mono); font-size: 0.78rem; overflow: hidden;
+}
+.terminal-bar {
+background: #141a12; padding: 10px 16px;
+display: flex; align-items: center; gap: 8px;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-title { font-size: 0.7rem; color: rgba(255,255,255,0.3); margin-left: 8px; }
+.terminal-body { padding: 20px; min-height: 300px; }
+.t-comment { color: #3a5c44; }
+.t-key { color: #7dd3fc; }
+.t-val { color: #a8e6c3; }
+.t-str { color: #fbbf24; }
+.t-err { color: #f87171; }
+.t-line { margin-bottom: 3px; }
+.run-btn {
+width: 100%; padding: 13px; background: var(--green); color: #fff;
+border: none; font-family: var(--mono); font-size: 0.82rem;
+cursor: pointer; transition: background 0.2s; letter-spacing: 0.04em;
+}
+.run-btn:hover { background: var(--green-light); }
+.run-btn:disabled { background: #1e2e23; color: rgba(255,255,255,0.3); cursor: not-allowed; }
+
+.patient-panel { display: flex; flex-direction: column; gap: 14px; }
+.patient-header {
+background: #fff; border: 1px solid var(--border);
+padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+}
+.patient-meta { font-family: var(--mono); font-size: 0.7rem; color: var(--ink3); }
+.patient-name { font-weight: 700; font-size: 0.95rem; margin-top: 3px; }
+.badge {
+font-family: var(--mono); font-size: 0.68rem;
+padding: 5px 12px; border: 1px solid; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.badge-stable { color: var(--green); border-color: var(--green); background: var(--green-pale); }
+.badge-high { color: var(--red); border-color: var(--red); background: var(--red-pale); animation: blink 1s infinite; }
+.badge-loading { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-pale); }
+
+.signals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sig {
+background: #fff; border: 1px solid var(--border);
+padding: 14px 16px; transition: border-color 0.3s;
+}
+.sig.alert { border-color: var(--red); background: var(--red-pale); }
+.sig.warn { border-color: var(--yellow); background: var(--yellow-pale); }
+.sig-label { font-family: var(--mono); font-size: 0.65rem; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; }
+.sig-val { font-family: var(--serif); font-size: 1.8rem; line-height: 1.1; margin-top: 3px; color: var(--ink); }
+.sig-val.ok { color: var(--green); }
+.sig-val.danger { color: var(--red); }
+.sig-val.warn { color: var(--yellow); }
+.sig-baseline { font-family: var(--mono); font-size: 0.63rem; color: var(--ink3); margin-top: 4px; }
+.dev-bar { height: 2px; background: var(--border); margin-top: 8px; }
+.dev-fill { height: 100%; transition: width 1s ease; }
+
+.chart-wrap { background: #fff; border: 1px solid var(--border); padding: 16px; }
+.chart-label { font-family: var(--mono); font-size: 0.65rem; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+.alert-panel {
+background: var(--red-pale); border: 1px solid var(--red);
+padding: 16px 20px; display: none;
+}
+.alert-panel.show { display: block; }
+.alert-title { font-family: var(--mono); font-size: 0.7rem; color: var(--red); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; font-weight: 500; }
+.alert-body { font-size: 0.82rem; color: var(--ink); line-height: 1.65; }
+.demo-note {
+font-family: var(--mono); font-size: 0.68rem; color: var(--ink3);
+border: 1px solid var(--border); padding: 10px 14px; background: var(--bg2);
+margin-top: 4px;
+}
+
+/* ── CLINICAL WORKFLOW ── */
+.workflow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 52px; }
+.wf-card {
+background: #fff; border: 1px solid var(--border); padding: 32px 28px;
+position: relative;
+}
+.wf-num {
+font-family: var(--serif); font-size: 4rem; color: var(--green-pale);
+line-height: 1; position: absolute; top: 16px; right: 20px;
+}
+.wf-card h3 { font-weight: 700; font-size: 0.92rem; margin-bottom: 10px; }
+.wf-card p { font-size: 0.84rem; color: var(--ink2); line-height: 1.7; }
+
+/* ── INVESTORS ── */
+.investor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 52px; }
+.inv-col h3 { font-family: var(--serif); font-size: 1.5rem; margin-bottom: 20px; }
+.inv-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.inv-list li {
+display: flex; gap: 12px; align-items: flex-start;
+font-size: 0.88rem; color: rgba(255,255,255,0.75); line-height: 1.65;
+}
+.inv-list li::before { content: '→'; color: #a8e6c3; flex-shrink: 0; font-family: var(--mono); font-size: 0.8rem; margin-top: 2px; }
+.market-block {
+margin-top: 48px;
+background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+padding: 32px;
+}
+.market-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px; }
+.mstat-num { font-family: var(--serif); font-size: 2.4rem; color: #a8e6c3; line-height: 1; }
+.mstat-label { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 6px; line-height: 1.5; }
+.mstat-source { font-family: var(--mono); font-size: 0.6rem; color: rgba(255,255,255,0.2); margin-top: 4px; }
+
+/* ── FAQ ── */
+.faq-list { margin-top: 48px; display: flex; flex-direction: column; gap: 2px; }
+.faq-item { border: 1px solid var(--border); background: #fff; overflow: hidden; }
+.faq-q {
+padding: 20px 24px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+display: flex; justify-content: space-between; align-items: center;
+transition: background 0.2s;
+}
+.faq-q:hover { background: var(--bg2); }
+.faq-q span { font-family: var(--mono); font-size: 1rem; color: var(--green); transition: transform 0.3s; }
+.faq-q.open span { transform: rotate(45deg); }
+.faq-a { padding: 0 24px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s; }
+.faq-a.open { max-height: 200px; padding: 0 24px 20px; }
+.faq-a p { font-size: 0.87rem; color: var(--ink2); line-height: 1.75; }
+
+/* ── PILOT PAGE ── */
+.pilot-hero {
+min-height: 50vh; display: flex; flex-direction: column;
+justify-content: center; padding: 120px 56px 72px;
+background: var(--ink); color: #fff;
+border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.pilot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 72px 56px; }
+.pilot-col h3 { font-family: var(--serif); font-size: 1.6rem; margin-bottom: 24px; }
+.checklist { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.checklist li {
+display: flex; gap: 12px; font-size: 0.88rem; color: var(--ink2); line-height: 1.65;
+}
+.checklist li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+.pilot-timeline { display: flex; flex-direction: column; gap: 2px; margin-top: 0; }
+.tl-row {
+display: grid; grid-template-columns: 120px 1fr;
+border: 1px solid var(--border); background: #fff;
+}
+.tl-week {
+font-family: var(--mono); font-size: 0.72rem; color: var(--green);
+padding: 16px; border-right: 1px solid var(--border);
+display: flex; align-items: center; background: var(--green-pale);
+}
+.tl-content { padding: 16px 20px; }
+.tl-content h4 { font-weight: 700; font-size: 0.88rem; margin-bottom: 4px; }
+.tl-content p { font-size: 0.82rem; color: var(--ink2); line-height: 1.6; }
+
+.contact-section {
+background: var(--green); padding: 72px 56px;
+display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+.contact-section h2 { font-family: var(--serif); font-size: 2.6rem; color: #fff; line-height: 1.1; }
+.contact-section p { color: rgba(255,255,255,0.75); margin-top: 16px; font-size: 0.95rem; line-height: 1.7; }
+.contact-form { display: flex; flex-direction: column; gap: 12px; }
+.contact-form input, .contact-form textarea, .contact-form select {
+background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+padding: 13px 16px; color: #fff; font-family: var(--sans); font-size: 0.88rem;
+outline: none; transition: border-color 0.2s;
+}
+.contact-form input::placeholder, .contact-form textarea::placeholder { color: rgba(255,255,255,0.4); }
+.contact-form input:focus, .contact-form textarea:focus, .contact-form select:focus { border-color: rgba(255,255,255,0.5); }
+.contact-form select { color: rgba(255,255,255,0.7); }
+.contact-form select option { background: var(--green); }
+.contact-form textarea { min-height: 100px; resize: vertical; }
+.btn-white { background: #fff; color: var(--green); border: none; padding: 14px 32px; font-family: var(--sans); font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.btn-white:hover { background: var(--green-pale); }
+
+/* ── SECURITY ── */
+.security-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+.sec-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 28px 24px; }
+.sec-icon { font-size: 1.5rem; margin-bottom: 12px; }
+.sec-card h4 { font-weight: 700; font-size: 0.88rem; color: #fff; margin-bottom: 8px; }
+.sec-card p { font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.65; }
+
+/* ── FOUNDER ── */
+.founder-section {
+padding: 80px 56px; background: var(--bg2);
+border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.founder-inner { max-width: 680px; margin: 0 auto; }
+.founder-quote {
+font-family: var(--serif); font-size: 1.5rem; line-height: 1.5; color: var(--ink);
+margin-bottom: 24px;
+}
+.founder-quote em { font-style: italic; color: var(--green); }
+.founder-sig { font-family: var(--mono); font-size: 0.78rem; color: var(--ink3); }
+
+/* ── FOOTER ── */
+footer {
+padding: 32px 56px; border-top: 1px solid var(--border);
+display: flex; justify-content: space-between; align-items: center;
+background: var(--bg);
+}
+.footer-logo { font-family: var(--sans); font-weight: 800; font-size: 0.9rem; color: var(--ink); }
+footer p { font-family: var(--mono); font-size: 0.68rem; color: var(--ink3); }
+footer a { color: var(--green); text-decoration: none; }
+
+/* ── RESPONSIVE ── */
+@media(max-width: 900px) {
+nav { padding: 0 20px; }
+.nav-links { display: none; }
+.hero { grid-template-columns: 1fr; }
+.hero-right { padding: 40px 24px; }
+.stats-grid { grid-template-columns: 1fr 1fr; }
+.section { padding: 60px 24px; }
+.problem-grid, .solution-grid, .workflow-grid, .investor-grid,
+.demo-container, .pilot-grid, .contact-section, .market-stats,
+.security-grid { grid-template-columns: 1fr; }
+.signals { grid-template-columns: 1fr 1fr; }
+footer { flex-direction: column; gap: 12px; text-align: center; padding: 24px; }
+.pilot-hero { padding: 100px 24px 48px; }
+.contact-section { padding: 48px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+<a class="nav-logo" href="#" onclick="showPage('main')">
+<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="28" height="28" fill="#0d5c32"/>
+<path d="M4 14 Q7 8 10 14 Q13 20 16 14 Q19 8 22 14" stroke="#a8e6c3" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<circle cx="14" cy="14" r="2.5" fill="#a8e6c3"/>
+</svg>
+<span class="nav-logo-text">PhysioSim Systems</span>
+</a>
+<ul class="nav-links">
+<li><a href="#problem" onclick="showPage('main')">Problem</a></li>
+<li><a href="#demo" onclick="showPage('main')">Demo</a></li>
+<li><a href="#investors" onclick="showPage('main')">Investors</a></li>
+<li><a href="#faq" onclick="showPage('main')">FAQ</a></li>
+<li><a href="#" onclick="showPage('pilot')">Pilot Program</a></li>
+<!-- Added navigation link to the proof of concept page -->
+<li><a href="poc.html">Proof of Concept</a></li>
+</ul>
+<div class="nav-actions">
+<button class="btn-sm btn-sm-ghost" onclick="showPage('pilot')">Request Pilot</button>
+<button class="btn-sm btn-sm-solid" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'});showPage('pilot')">Contact Founder</button>
+</div>
+</nav>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- MAIN PAGE -->
+<!-- ══════════════════════════════════════════ -->
+<div id="page-main" class="page active">
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-left">
+<div class="hero-eyebrow">Physiological Signal Intelligence · API Infrastructure</div>
+<h1>Detect subclinical deviations <em>before</em> costly clinical escalation.</h1>
+<p class="hero-sub">PhysioSim Systems is an API infrastructure layer that learns each individual's physiological baseline from longitudinal, multi-signal data — and surfaces persistent, meaningful deviations earlier than any threshold-based system. Used for chronic care monitoring and clinical trial safety surveillance.</p>
+<p class="hero-disclaimer">PhysioSim does not diagnose and does not make clinical decisions. It supports earlier clinical awareness. All outputs require human review before any action is taken.</p>
+<div class="hero-actions">
+<button class="btn-primary" onclick="showPage('pilot')">Request Access</button>
+<button class="btn-outline" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">View Sample Demo</button>
+<button class="btn-outline" onclick="window.location.href='mailto:phoebegarcia@protonmail.com'">Contact Founder</button>
+</div>
+</div>
+<div class="hero-right">
+<div class="workflow-label" style="color:rgba(255,255,255,0.35);font-family:var(--mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;">// Signal-to-action workflow</div>
+<div class="hero-workflow" style="margin-top:0">
+<div class="workflow-steps">
+<div class="workflow-step">Longitudinal Data</div><div class="workflow-arrow">→</div>
+<div class="workflow-step">PhysioSim API</div><div class="workflow-arrow">→</div>
+<div class="workflow-step">Risk + Rationale</div><div class="workflow-arrow">→</div>
+<div class="workflow-step">Clinical Review</div><div class="workflow-arrow">→</div>
+<div class="workflow-step">Action</div>
+</div>
+</div>
+<div class="stats-grid" style="margin-top:24px">
+<div class="stat-block">
+<div class="stat-num">10<span class="stat-unit">+</span></div>
+<div class="stat-label">Physiological signal types supported across chronic care and trial monitoring</div>
+<div class="stat-source">HR, SpO₂, RR, weight, BP, ECG, pleth, temp, activity, accelerometer</div>
+</div>
+<div class="stat-block">
+<div class="stat-num">3</div>
+<div class="stat-label">Clinical validators across EM, NICU, and pre-hospital settings</div>
+<div class="stat-source">Customer discovery, 2026</div>
+</div>
+<div class="stat-block">
+<div class="stat-num">$108<span class="stat-unit">B</span></div>
+<div class="stat-label">Annual US heart failure costs — primary chronic care use case</div>
+<div class="stat-source">AHA Heart Disease & Stroke Statistics, 2023</div>
+</div>
+<div class="stat-block">
+<div class="stat-num">$50<span class="stat-unit">B+</span></div>
+<div class="stat-label">Annual global clinical trial monitoring spend</div>
+<div class="stat-source">Grand View Research, 2024</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- PROBLEM / SOLUTION BANNER -->
+<div style="background:var(--ink);border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);">
+<div style="display:grid;grid-template-columns:1fr 1fr;max-width:1200px;margin:0 auto;">
+<div style="padding:40px 48px;border-right:1px solid rgba(255,255,255,0.06);">
+<div style="font-family:var(--mono);font-size:0.68rem;color:#a8e6c3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">The Problem</div>
+<p style="font-size:0.95rem;color:rgba(255,255,255,0.75);line-height:1.75;margin:0;">Chronic care management consumes over 50% of healthcare spending, largely driven by preventable hospital readmissions. Traditional monitoring relies on static, threshold-based alerts that only trigger after a patient is already in acute distress — leaving clinicians stuck in a reactive bottleneck.</p>
+</div>
+<div style="padding:40px 48px;">
+<div style="font-family:var(--mono);font-size:0.68rem;color:#a8e6c3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;">The Solution</div>
+<p style="font-size:0.95rem;color:rgba(255,255,255,0.75);line-height:1.75;margin:0;">No disease is random. Our bodies shift from their regular baseline silently before it becomes an obvious problem. PhysioSim learns individualized baselines and detects those subtle, sub-clinical deviations early — so clinicians can step in before a crisis hits. Zero hardware overhead. Scales as an API layer into any existing workflow.</p>
+</div>
+</div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem" class="section section-alt">
+<div class="label">// The problem</div>
+<h2 class="section-title">Physiological deterioration is <em>gradual</em>. Detection is always too late.</h2>
+<div class="problem-grid">
+<div class="problem-card">
+<h3>Static Thresholds Fail Individuals</h3>
+<p>Population-based alert rules don't account for each individual's normal range. They create false alarms for stable patients and miss early physiological drift in others — in both clinical care and trial monitoring.</p>
+</div>
+<div class="problem-card">
+<h3>Signal Overload</h3>
+<p>EHRs, RPM devices, wearables, trial monitoring platforms — care teams and trial coordinators have the data streams but lack tools to interpret multi-signal longitudinal trends in real time.</p>
+</div>
+<div class="problem-card">
+<h3>Alert Fatigue</h3>
+<p>Noisy monitoring queues erode clinical trust. When alarms fire constantly on population thresholds, real individual-level signals get buried — and action is delayed or missed entirely.</p>
+</div>
+<div class="problem-card">
+<h3>No Intelligence Layer Exists</h3>
+<p>RPM programs and clinical trials have the longitudinal data. No API-layer product exists that learns per-individual baselines at scale and routes explainable, actionable alerts into existing workflows.</p>
+</div>
+</div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution" class="section">
+<div class="label">// Our solution</div>
+<h2 class="section-title">Individualized baselines. <em>Persistent deviation</em> detection. Workflow-native delivery.</h2>
+<div class="solution-grid">
+<div class="solution-features">
+<div class="feature-item">
+<div class="feature-icon">◎</div>
+<div class="feature-text">
+<h4>Individualized Baseline Modeling</h4>
+<p>PhysioSim builds a personalized physiological model per patient from longitudinal data — no population averages, no one-size-fits-all thresholds.</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon">⟂</div>
+<div class="feature-text">
+<h4>Multi-Signal Deviation Detection</h4>
+<p>We detect persistent, meaningful deviations across weight, HR, activity, symptoms, labs — including frequency-domain and waveform features from raw physiological signals when available.</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon">△</div>
+<div class="feature-text">
+<h4>Risk Stratification with Rationale</h4>
+<p>Low / medium / high risk output with a concise, explainable rationale — so care coordinators can act without physician review for every case.</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon">⇢</div>
+<div class="feature-text">
+<h4>Workflow-Native Delivery</h4>
+<p>Outputs route into existing nurse queues, care coordinator tools, and clinical systems. No new dashboard required. Infrastructure, not a consumer app.</p>
+</div>
+</div>
+<div class="important-note">
+<p>⚠ PhysioSim does <strong>not</strong> diagnose medical conditions and does <strong>not</strong> make clinical decisions. It supports earlier clinical awareness. All outputs require human review before any action is taken.</p>
+</div>
+</div>
+<div>
+<div style="background:var(--bg2);border:1px solid var(--border);padding:28px;">
+<div class="label">// Supported signals</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;">
+{['Weight trends','Resting heart rate','Blood pressure','Activity / step count','SpO₂','Symptom questionnaires','Key labs (when available)','ED visits / medication changes','ECG / waveforms (when available)'].map(s=>`
+<div style="display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--ink2);">
+<span style="color:var(--green);font-family:var(--mono);font-size:0.75rem;">+</span> ${s}
+</div>`).join('')}
+</div>
+<div style="margin-top:20px;font-family:var(--mono);font-size:0.68rem;color:var(--ink3);border-top:1px solid var(--border);padding-top:14px;">Signal availability is source- and partner-dependent.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- USE CASES -->
+<section class="section section-alt">
+<div class="label">// Use cases</div>
+<h2 class="section-title">One engine. <em>Multiple</em> applications.</h2>
+<p style="margin-top:16px;font-size:0.95rem;color:var(--ink2);max-width:600px;line-height:1.75;">The same individualized baseline intelligence applies across any context where longitudinal physiological data exists and individual-level deviation matters.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px;">
+
+<div style="background:#fff;border:1px solid var(--border);padding:36px 32px;border-top:3px solid var(--green);">
+<div style="font-family:var(--mono);font-size:0.7rem;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;">Chronic Care Monitoring</div>
+<h3 style="font-family:var(--serif);font-size:1.5rem;margin-bottom:12px;line-height:1.2;">Earlier intervention.<br/>Fewer avoidable admissions.</h3>
+<p style="font-size:0.88rem;color:var(--ink2);line-height:1.75;margin-bottom:20px;">For RPM programs, payers, ACOs, and health systems managing high-risk chronic disease populations. PhysioSim detects persistent physiological drift weeks before clinical deterioration becomes obvious — giving care teams time to intervene before hospitalization.</p>
+<div style="display:flex;flex-direction:column;gap:8px;">
+<div style="font-size:0.84rem;color:var(--ink2);display:flex;gap:10px;"><span style="color:var(--green);font-weight:700;">✓</span> Heart failure — primary use case</div>
+<div style="font-size:0.84rem;color:var(--ink2);display:flex;gap:10px;"><span style="color:var(--green);font-weight:700;">✓</span> Medicare Advantage, ACOs, VA, government programs</div>
+<div style="font-size:0.84rem;color:var(--ink2);display:flex;gap:10px;"><span style="color:var(--green);font-weight:700;">✓</span> Nurse-first routing into existing RPM workflows</div>
+<div style="font-size:0.84rem;color:var(--ink2);display:flex;gap:10px;"><span style="color:var(--green);font-weight:700;">✓</span> Tiered EHR/Epic integration for high-confidence alerts</div>
+</div>
+</div>
+
+<div style="background:var(--ink);border:1px solid var(--border);padding:36px 32px;border-top:3px solid #a8e6c3;">
+<div style="font-family:var(--mono);font-size:0.7rem;color:#a8e6c3;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;">Clinical Trial Safety Monitoring</div>
+<h3 style="font-family:var(--serif);font-size:1.5rem;margin-bottom:12px;line-height:1.2;color:#fff;">Earlier safety signals.<br/>Smarter trial monitoring.</h3>
+<p style="font-size:0.88rem;color:rgba(255,255,255,0.6);line-height:1.75;margin-bottom:20px;">For pharmaceutical sponsors and CROs running decentralized or hybrid clinical trials. PhysioSim monitors trial participants for individualized adverse event signals — detecting physiological deviation from personal baseline rather than population norms, reducing missed safety events and late withdrawals.</p>
+<div style="display:flex;flex-direction:column;gap:8px;">
+<div style="font-size:0.84rem;color:rgba(255,255,255,0.75);display:flex;gap:10px;"><span style="color:#a8e6c3;font-weight:700;">✓</span> Decentralized & hybrid trial participant monitoring</div>
+<div style="font-size:0.84rem;color:rgba(255,255,255,0.75);display:flex;gap:10px;"><span style="color:#a8e6c3;font-weight:700;">✓</span> Cardiotoxicity monitoring during oncology trials</div>
+<div style="font-size:0.84rem;color:rgba(255,255,255,0.75);display:flex;gap:10px;"><span style="color:#a8e6c3;font-weight:700;">✓</span> Individualized adverse event detection</div>
+<div style="font-size:0.84rem;color:rgba(255,255,255,0.75);display:flex;gap:10px;"><span style="color:#a8e6c3;font-weight:700;">✓</span> FDA-aligned remote safety surveillance infrastructure</div>
+</div>
+</div>
+
+</div>
+<div style="margin-top:14px;font-family:var(--mono);font-size:0.68rem;color:var(--ink3);padding:10px 14px;border:1px solid var(--border);background:#fff;">
+ⓘ PhysioSim is pre-commercial. Access is by approved partner arrangement. Both use cases use the same underlying API — what changes is the data source and clinical context.
+</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="section section-dark">
+<div class="label label-light">// How it works</div>
+<h2 class="section-title section-title-light" style="color:#fff">Five steps from <em>raw data</em> to clinical action.</h2>
+<div class="steps-list">
+<div class="step-row">
+<div class="step-num">01</div>
+<div class="step-content">
+<h3>Ingest</h3>
+<p>Patient data flows in from existing sources — EHRs, remote monitoring tools, wearables, clinical data streams — via standard interfaces. Raw physiologic signals (ECG, waveforms, accelerometer) included when available.</p>
+</div>
+</div>
+<div class="step-row">
+<div class="step-num">02</div>
+<div class="step-content">
+<h3>Model the Individual Baseline</h3>
+<p>PhysioSim builds a personalized baseline for each patient over a defined lookback window. Each signal is characterized relative to that individual's normal range — not a population average.</p>
+</div>
+</div>
+<div class="step-row">
+<div class="step-num">03</div>
+<div class="step-content">
+<h3>Detect Persistent Deviation</h3>
+<p>We flag sustained, multi-signal deviation that exceeds the patient's historical variance — with emphasis on persistence over transient noise. Frequency-domain and waveform features analyzed where available.</p>
+</div>
+</div>
+<div class="step-row">
+<div class="step-num">04</div>
+<div class="step-content">
+<h3>Route to Nurse / Care Coordinator First</h3>
+<p>Alerts with concise, explainable rationale are delivered to the first-line care team — not physicians by default. Designed to fit existing RPM and chronic care operations staffing models.</p>
+</div>
+</div>
+<div class="step-row">
+<div class="step-num">05</div>
+<div class="step-content">
+<h3>Review, Contact, Escalate as Warranted</h3>
+<p>The care team reviews the alert, contacts the patient if needed, adjusts the care plan, and escalates to a physician only when clinically warranted. PhysioSim supports the decision — it doesn't make it.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- DEMO -->
+<section id="demo" class="section section-alt">
+<div class="label">// Sample demo</div>
+<h2 class="section-title">See the API <em>work</em> — with sample data only.</h2>
+<p style="margin-top:12px;font-size:0.88rem;color:var(--ink3)">This demonstration uses illustrative, fictional patient data. No real patient information is shown.</p>
+<div class="demo-container">
+<div>
+<div class="terminal">
+<div class="terminal-bar">
+<div class="dot" style="background:#ff5f57"></div>
+<div class="dot" style="background:#ffbd2e"></div>
+<div class="dot" style="background:#28ca41"></div>
+<span class="terminal-title">POST api.physiosim.io/v1/patients/analyze</span>
+</div>
+<div class="terminal-body" id="terminal">
+<div class="t-line t-comment">// PhysioSim Systems API — Sample Data Only</div>
+<div class="t-line">&nbsp;</div>
+<div class="t-line"><span style="color:rgba(255,255,255,0.3)">POST</span> /v1/patients/analyze</div>
+<div class="t-line">&nbsp;</div>
+<div class="t-line">{</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"patient_id"</span>: <span class="t-str">"SAMPLE-A"</span>,</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"program"</span>: <span class="t-str">"heart_failure_rpm"</span>,</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"baseline_days"</span>: <span class="t-val">60</span>,</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"signals"</span>: {</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"weight_kg"</span>: <span class="t-val">85.2</span>,</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"resting_hr_bpm"</span>: <span class="t-val">92</span>,</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"daily_steps"</span>: <span class="t-val">1640</span>,</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"symptom_flags"</span>: [<span class="t-str">"dyspnea"</span>]</div>
+<div class="t-line">&nbsp;&nbsp;}</div>
+<div class="t-line">}</div>
+<div class="t-line">&nbsp;</div>
+<div class="t-line t-comment" id="term-status">// Ready — press Run to simulate →</div>
+</div>
+<button class="run-btn" id="runBtn" onclick="runDemo()">▶ Run Sample API Call</button>
+</div>
+<div class="demo-note">⚠ Sample data only. This is a simulated demonstration for illustrative purposes.</div>
+</div>
+<div class="patient-panel">
+<div class="patient-header">
+<div>
+<div class="patient-meta">ID: SAMPLE-A · HF RPM Program</div>
+<div class="patient-name">Sample Patient A — Illustrative</div>
+</div>
+<div class="badge badge-loading" id="statusBadge">● Awaiting...</div>
+</div>
+<div class="signals">
+<div class="sig" id="sig-wt">
+<div class="sig-label">Weight</div>
+<div class="sig-val ok" id="val-wt">85.2 kg</div>
+<div class="sig-baseline">Baseline: 83.1 kg</div>
+<div class="dev-bar"><div class="dev-fill" id="fill-wt" style="width:0%;background:var(--green)"></div></div>
+</div>
+<div class="sig" id="sig-hr">
+<div class="sig-label">Resting HR</div>
+<div class="sig-val ok" id="val-hr">92 bpm</div>
+<div class="sig-baseline">Baseline: 72 bpm</div>
+<div class="dev-bar"><div class="dev-fill" id="fill-hr" style="width:0%;background:var(--green)"></div></div>
+</div>
+<div class="sig" id="sig-steps">
+<div class="sig-label">Daily Steps</div>
+<div class="sig-val ok" id="val-steps">1,640</div>
+<div class="sig-baseline">Baseline: 3,900</div>
+<div class="dev-bar"><div class="dev-fill" id="fill-steps" style="width:0%;background:var(--green)"></div></div>
+</div>
+<div class="sig" id="sig-sym">
+<div class="sig-label">Symptoms</div>
+<div class="sig-val ok" id="val-sym">Reported</div>
+<div class="sig-baseline">Flag: dyspnea</div>
+<div class="dev-bar"><div class="dev-fill" id="fill-sym" style="width:0%;background:var(--green)"></div></div>
+</div>
+</div>
+<div class="chart-wrap">
+<div class="chart-label">Sample weight trend — 14-day window (illustrative)</div>
+<canvas id="trendChart" height="90"></canvas>
+</div>
+<div class="alert-panel" id="alertPanel">
+<div class="alert-title">⚠ Sample Output: Deterioration Risk — HIGH</div>
+<div class="alert-body">Sustained upward shift in weight (+2.1 kg over 6 days) with concurrent resting HR elevation (+9 bpm over 5 days) and activity decline. Symptom check-in: increased dyspnea 2 of last 3 days. Pattern persistent beyond short-term noise window. <strong>Suggested action:</strong> Nurse review → patient outreach → escalate to physician if warranted.</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- CLINICAL WORKFLOW -->
+<section id="workflow" class="section">
+<div class="label">// Clinical & trial workflow</div>
+<h2 class="section-title">Built to fit <em>existing workflows</em> — not replace them.</h2>
+<div class="workflow-grid">
+<div class="wf-card">
+<div class="wf-num">1</div>
+<h3>Human-First Routing</h3>
+<p>Alerts route to nurses, care coordinators, or trial safety monitors as first-line reviewers. Physicians and investigators receive escalations only when the review team determines it's warranted — preserving expert time.</p>
+</div>
+<div class="wf-card">
+<div class="wf-num">2</div>
+<h3>Human-in-the-Loop</h3>
+<p>Every alert requires human review before any action. PhysioSim surfaces risk and rationale; clinicians and investigators own the decision. This is by design, not a limitation.</p>
+</div>
+<div class="wf-card">
+<div class="wf-num">3</div>
+<h3>Noise Reduction by Design</h3>
+<p>Transient anomalies are de-emphasized. Only persistent, multi-signal deviation from an individual's own baseline triggers an alert — reducing queue volume and restoring trust in monitoring systems.</p>
+</div>
+</div>
+</section>
+
+<!-- INVESTORS -->
+<section id="investors" class="section section-dark">
+<div class="label label-light">// For investors & partners</div>
+<h2 class="section-title section-title-light" style="color:#fff">A large, measurable problem.<br/><em>A clear infrastructure solution.</em></h2>
+
+<!-- Problem / Solution / Why Invest — global framing -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin-top:40px;">
+<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:32px 28px;">
+<div style="font-family:var(--mono);font-size:0.68rem;color:#a8e6c3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">The Problem</div>
+<p style="font-size:0.92rem;color:rgba(255,255,255,0.8);line-height:1.75;">Chronic care management consumes over 50% of healthcare spending, largely driven by preventable hospital readmissions. Traditional remote monitoring relies on static, threshold-based alerts that only trigger after a patient is already in acute distress — leaving clinicians stuck in a reactive bottleneck.</p>
+</div>
+<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:32px 28px;">
+<div style="font-family:var(--mono);font-size:0.68rem;color:#a8e6c3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">The Solution</div>
+<p style="font-size:0.92rem;color:rgba(255,255,255,0.8);line-height:1.75;">No disease is random. Internally, our bodies shift from their regular baseline silently before it ever becomes an obvious problem. PhysioSim is an API infrastructure layer that learns individualized baselines and detects those subtle, sub-clinical deviations early, via multi-signal/wavelet validation — so clinicians can step in before a crisis hits.</p>
+</div>
+<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:32px 28px;">
+<div style="font-family:var(--mono);font-size:0.68rem;color:#a8e6c3;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Why Invest</div>
+<p style="font-size:0.92rem;color:rgba(255,255,255,0.8);line-height:1.75;">By focusing on API architecture, PhysioSim scales with zero hardware overhead. Our immediate go-to-market targets Decentralized Clinical Trials (DCTs) to drive fast enterprise revenue, before scaling our predictive infrastructure layer into the broader hospital and remote patient monitoring space.</p>
+</div>
+</div>
+
+<div class="investor-grid" style="margin-top:32px;">
+<div class="inv-col">
+<h3 style="color:#fff">Why now</h3>
+<ul class="inv-list">
+<li>Remote monitoring adoption accelerated post-pandemic — data streams exist globally but intelligent analysis layers do not</li>
+<li>Decentralized Clinical Trials (DCTs) are growing rapidly — FDA and EMA guidance now requires remote participant monitoring</li>
+<li>Individualized, explainable AI is now technically feasible at the per-patient level with longitudinal wearable data</li>
+<li>Heart failure alone drives $26B+ in preventable hospitalizations annually — the same pattern repeats across chronic conditions globally</li>
+<li>No API-layer product exists that learns per-individual baselines at scale and routes actionable alerts into existing clinical workflows</li>
+</ul>
+</div>
+<div class="inv-col">
+<h3 style="color:#fff">Target buyers — global</h3>
+<ul class="inv-list">
+<li>Pharmaceutical sponsors & CROs running decentralized or hybrid clinical trials requiring remote safety monitoring</li>
+<li>Insurance payers & government health programs seeking to reduce avoidable chronic disease admissions</li>
+<li>Health systems and hospital networks operating remote patient monitoring programs</li>
+<li>ACOs and value-based care organizations with shared savings incentives tied to readmission reduction</li>
+<li>RPM device manufacturers & digital health platforms seeking individualized intelligence as an API layer</li>
+<li>National health services (NHS, provincial health authorities, integrated delivery networks) with chronic disease populations</li>
+</ul>
+</div>
+</div>
+
+<div class="market-block">
+<div class="label label-light">// Market sizing (published sources)</div>
+<div class="market-stats">
+<div>
+<div class="mstat-num">$8.3B</div>
+<div class="mstat-label">Global Remote Patient Monitoring market (2023)</div>
+<div class="mstat-source">Grand View Research, 2024</div>
+</div>
+<div>
+<div class="mstat-num">$50B+</div>
+<div class="mstat-label">Global clinical trial monitoring spend annually</div>
+<div class="mstat-source">Grand View Research, 2024</div>
+</div>
+<div>
+<div class="mstat-num">$26B+</div>
+<div class="mstat-label">Estimated annual cost of preventable HF readmissions globally</div>
+<div class="mstat-source">AHRQ / ESC peer-reviewed literature</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="section section-alt">
+<div class="label">// FAQ — for healthcare teams</div>
+<h2 class="section-title">Common questions, <em>direct answers.</em></h2>
+<div class="faq-list" id="faqList"></div>
+</section>
+
+<!-- SECURITY -->
+<section class="section section-dark">
+<div class="label label-light">// Security & privacy</div>
+<h2 class="section-title section-title-light" style="color:#fff">Pilot-ready. <em>Conservative by default.</em></h2>
+<div class="security-grid">
+<div class="sec-card">
+<div class="sec-icon">🔒</div>
+<h4>Data Minimization</h4>
+<p>Only fields required for the agreed pilot use case are ingested. No unnecessary data collection.</p>
+</div>
+<div class="sec-card">
+<div class="sec-icon">🛡</div>
+<h4>Encryption</h4>
+<p>Data encrypted in transit. Encryption at rest where stored (deployment-dependent). De-identified dataset workflows supported.</p>
+</div>
+<div class="sec-card">
+<div class="sec-icon">👁</div>
+<h4>Access Controls</h4>
+<p>Role-based access to pilot artifacts and outputs. Access logs maintained for all data interactions.</p>
+</div>
+<div class="sec-card">
+<div class="sec-icon">⚕</div>
+<h4>Clinical Safety</h4>
+<p>Decision support only. Care team review is required before any patient action. No autonomous clinical decisions.</p>
+</div>
+<div class="sec-card">
+<div class="sec-icon">📋</div>
+<h4>HIPAA-Minded by Design</h4>
+<p>PhysioSim is pre-commercial and not yet HIPAA certified. We are built with HIPAA alignment as a design principle — data minimization, access controls, encryption, and de-identified workflows are in place. Full compliance is addressed per pilot before any real patient data is used.</p>
+</div>
+<div class="sec-card">
+<div class="sec-icon">⚖</div>
+<h4>Regulatory Positioning</h4>
+<p>Positioned as risk detection / decision support (not diagnosis or treatment). Regulatory requirements depend on claims and intended use; assessed per deployment.</p>
+</div>
+</div>
+</section>
+
+<!-- LICENSING -->
+<section class="section section-alt">
+<div class="label">// Licensing & access model</div>
+<h2 class="section-title">Built for the North American markets. <em>Two ways</em> to work with us.</h2>
+<p style="margin-top:16px;font-size:0.9rem;color:var(--ink2);max-width:580px;line-height:1.75">PhysioSim is currently in pre-commercial pilot stage. Access is by approved partner arrangement only. We offer two primary licensing structures depending on your organization type.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:40px;">
+<div style="background:#fff;border:1px solid var(--border);padding:40px 36px;position:relative;overflow:hidden;">
+<div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)"></div>
+<div style="font-family:var(--mono);font-size:0.7rem;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">For payers & health systems</div>
+<div style="font-family:var(--serif);font-size:2.2rem;color:var(--ink);line-height:1;">Per patient-month</div>
+<p style="margin-top:16px;font-size:0.88rem;color:var(--ink2);line-height:1.75">A recurring per-monitored-patient fee tied directly to your active HF monitoring cohort. Scales with your program — no large upfront commitment. Pricing discussed per pilot based on cohort size and data complexity.</p>
+<div style="margin-top:24px;display:flex;flex-direction:column;gap:8px;">
+<div style="display:flex;gap:10px;font-size:0.84rem;color:var(--ink2)"><span style="color:var(--green);font-weight:700">✓</span> Medicare Advantage & commercial payers</div>
+<div style="display:flex;gap:10px;font-size:0.84rem;color:var(--ink2)"><span style="color:var(--green);font-weight:700">✓</span> ACOs & value-based care programs</div>
+<div style="display:flex;gap:10px;font-size:0.84rem;color:var(--ink2)"><span style="color:var(--green);font-weight:700">✓</span> VA & government health programs</div>
+<div style="display:flex;gap:10px;font-size:0.84rem;color:var(--ink2)"><span style="color:var(--green);font-weight:700">✓</span> Hospital RPM programs</div>
+</div>
+<button class="btn-primary" style="margin-top:28px" onclick="showPage('pilot')">Request Pilot Pricing</button>
+</div>
+<div style="background:var(--ink);border:1px solid var(--border);padding:40px 36px;position:relative;overflow:hidden;">
+<div style="position:absolute;top:0;left:0;right:0;height:3px;background:#a8e6c3"></div>
+<div style="font-family:var(--mono);font-size:0.7rem;color:#a8e6c3;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">For medtech & RPM platforms</div>
+<div style="font-family:var(--serif);font-size:2.2rem;color:#fff;line-height:1;">API platform license</div>
+<p style="margin-top:16px;font-size:0.88rem;color:rgba(255,255,255,0.6);line-height:1.75">An API licensing arrangement for device manufacturers and digital health platforms that want to embed PhysioSim intelligence into their existing product. PhysioSim becomes your individualized baseline layer — you own the customer relationship.</p>
+<div style="margin-top:24px;display:flex;flex-direction:column;gap:8px;">
+<div style="display:flex;gap:10px;font-size:0.84rem;color:rgba(255,255,255,0.65)"><span style="color:#a8e6c3;font-weight:700">✓</span> RPM device manufacturers & cardiac monitoring OEMs</div>
+<div style="display:flex;gap:10px;font-size:0.84rem;color:rgba(255,255,255,0.65)"><span style="color:#a8e6c3;font-weight:700">✓</span> RPM software platforms</div>
+<div style="display:flex;gap:10px;font-size:0.84rem;color:rgba(255,255,255,0.65)"><span style="color:#a8e6c3;font-weight:700">✓</span> EHR-integrated care management tools</div>
+<div style="display:flex;gap:10px;font-size:0.84rem;color:rgba(255,255,255,0.65)"><span style="color:#a8e6c3;font-weight:700">✓</span> White-label & co-branded arrangements</div>
+</div>
+<button class="btn-primary" style="margin-top:28px;background:#a8e6c3;color:var(--ink)" onclick="window.location.href='mailto:phoebegarcia@protonmail.com'">Discuss Partnership</button>
+</div>
+</div>
+<div style="margin-top:16px;font-family:var(--mono);font-size:0.7rem;color:var(--ink3);padding:12px 16px;border:1px solid var(--border);background:#fff;">
+ⓘ PhysioSim is focused exclusively on the US market. API access is provided to approved partners only — no public endpoints. Pilot pricing discussed on a per-partner basis.
+</div>
+</section>
+
+<!-- CLINICAL VALIDATION -->
+<section class="section section-alt">
+<div class="label">// Early clinical validation</div>
+<h2 class="section-title">What clinicians are <em>saying.</em></h2>
+<p style="margin-top:16px;font-size:0.88rem;color:var(--ink2);max-width:600px;line-height:1.75">The following are unsolicited responses from clinical professionals during early customer discovery conversations. Shared with permission, anonymized.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px;">
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--green);padding:32px 28px;box-shadow:var(--shadow);">
+<div style="font-family:var(--serif);font-size:1.15rem;color:var(--ink);line-height:1.7;font-style:italic;">"By the time heart failure patients reach us in the ED, they've usually been declining physiologically for days to weeks before symptoms become obvious. We're seeing the endpoint of something that was already in motion. A system that could reliably flag sub-clinical instability around 10 days out would be very actionable — that gives outpatient teams time to adjust diuretics, review meds and labs, increase monitoring, or step in before things progress to pulmonary edema and an ER visit."</div>
+<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+<div style="font-weight:700;font-size:0.88rem;color:var(--ink);">EM Resident, MPH/Clinical Advisor</div>
+<div style="font-family:var(--mono);font-size:0.72rem;color:var(--ink3);margin-top:3px;">Yale School of Medicine · Early customer discovery, 2026</div>
+</div>
+</div>
+<div style="background:#fff;border:1px solid var(--border);border-left:4px solid var(--green);padding:32px 28px;box-shadow:var(--shadow);">
+<div style="font-family:var(--serif);font-size:1.15rem;color:var(--ink);line-height:1.7;font-style:italic;">"Personalizing it to a patient's own baseline rather than population averages would make it far more clinically useful. The real challenge isn't whether the signal is there — it's making the model specific enough to minimize false alarms. From a public health perspective, this is significant. Heart failure admissions are resource-heavy and hit hardest among patients with limited access to regular outpatient care. Tools like this could reach them where traditional care often doesn't."</div>
+<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+<div style="font-weight:700;font-size:0.88rem;color:var(--ink);">EM Resident, MPH/Clinical Advisor</div>
+<div style="font-family:var(--mono);font-size:0.72rem;color:var(--ink3);margin-top:3px;">Yale School of Medicine · Early customer discovery, 2026</div>
+</div>
+</div>
+</div>
+<div style="margin-top:16px;font-family:var(--mono);font-size:0.68rem;color:var(--ink3);padding:10px 14px;border:1px solid var(--border);background:#fff;">
+ⓘ These are qualitative customer discovery insights, not clinical validation data. PhysioSim has not completed a prospective clinical trial.
+</div>
+</section>
+
+<!-- FOUNDER NOTE -->
+<div class="founder-section">
+<div class="founder-inner">
+<div class="label">// From the founder</div>
+<div class="founder-quote">"PhysioSim is being built for <em>real care delivery environments</em> — high signal density, limited staffing, and the need for actionable, explainable alerts that reduce noise, not add to it."</div>
+<div class="founder-sig">Phoebe Garcia · Founder, PhysioSim Systems · phoebegarcia@protonmail.com</div>
+<div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+    <button class="btn-outline" onclick="showPage('pilot')">Request Pilot Access</button>
+    <button class="btn-primary" onclick="window.location.href='mailto:phoebegarcia@protonmail.com'">Email Founder</button>
+    <!-- Removed link to pitch deck as requested -->
+</div>
+</div>
+</div>
+
+</div><!-- end page-main -->
+
+<!-- ══════════════════════════════════════════ -->
+<!-- PILOT PAGE -->
+<!-- ══════════════════════════════════════════ -->
+<div id="page-pilot" class="page">
+
+<div class="pilot-hero">
+<div class="label label-light">// Pilot program</div>
+<h1 style="font-family:var(--serif);font-size:clamp(2.4rem,5vw,3.8rem);line-height:1.08;color:#fff;max-width:700px">
+Focused pilots for chronic care and clinical trial programs — <em style="color:#a8e6c3">results in 4–8 weeks.</em>
+</h1>
+<p style="color:rgba(255,255,255,0.6);margin-top:20px;max-width:580px;font-size:0.95rem;line-height:1.75">
+We run structured, governed pilots with health systems, RPM platforms, payer-sponsored programs, and pharmaceutical trial sponsors. No production integration required to start. De-identified retrospective data is sufficient for initial evaluation.
+</p>
+</div>
+
+<div class="pilot-grid">
+<div class="pilot-col">
+<h3>Ideal pilot characteristics</h3>
+<ul class="checklist">
+<li>High-risk heart failure cohort with existing monitoring data</li>
+<li>Active RPM or chronic care operations team (nurse/care coordinator staffing)</li>
+<li>Defined escalation pathways and coverage model</li>
+<li>Ability to share de-identified or appropriately governed data streams</li>
+<li>Willingness to provide feedback on alert quality and workflow fit</li>
+</ul>
+<div style="margin-top:32px">
+<h3>What you'll evaluate</h3>
+<ul class="checklist" style="margin-top:0">
+<li>Earlier identification vs. existing static thresholds</li>
+<li>Alert volume and false positive rate (vs. current system)</li>
+<li>Nurse review burden and workflow integration</li>
+<li>Clinical usefulness of rationale output (human-in-the-loop)</li>
+<li>Signal-to-noise ratio across your specific patient cohort</li>
+</ul>
+</div>
+</div>
+<div class="pilot-col">
+<h3>Pilot timeline</h3>
+<div class="pilot-timeline">
+<div class="tl-row">
+<div class="tl-week">Week 1</div>
+<div class="tl-content">
+<h4>Alignment & Setup</h4>
+<p>Define cohort, baseline window, alert persistence thresholds, and routing (nurse-first). Align on data sharing approach and governance.</p>
+</div>
+</div>
+<div class="tl-row">
+<div class="tl-week">Weeks 2–3</div>
+<div class="tl-content">
+<h4>Baseline Modeling</h4>
+<p>PhysioSim builds individualized baselines from your de-identified longitudinal data. Initial model validation and threshold calibration.</p>
+</div>
+</div>
+<div class="tl-row">
+<div class="tl-week">Weeks 4–6</div>
+<div class="tl-content">
+<h4>Live Detection & Review</h4>
+<p>Deviation alerts generated and reviewed by your care team. Weekly summary of signal / noise and cases for clinical review.</p>
+</div>
+</div>
+<div class="tl-row">
+<div class="tl-week">Weeks 7–8</div>
+<div class="tl-content">
+<h4>Evaluation & Readout</h4>
+<p>Structured readout: earlier identification rate, alert volume, review burden, and clinical usefulness assessment. Go / no-go for expanded deployment.</p>
+</div>
+</div>
+</div>
+<div style="margin-top:16px;font-family:var(--mono);font-size:0.7rem;color:var(--ink3);padding:12px 14px;border:1px solid var(--border);background:var(--bg2)">
+Retrospective evaluation (shorter timeline) also available for initial signal validation before prospective pilot commitment.
+</div>
+</div>
+</div>
+
+<!-- CONTACT FORM -->
+<div id="contact" class="contact-section">
+<div>
+<div class="label" style="color:rgba(255,255,255,0.5)">// Get in touch</div>
+<h2>Ready to start a pilot conversation?</h2>
+<p>We welcome enquiries from health systems, RPM platforms, payers (commercial and government), and ACOs running heart failure programs. No commitment required for an initial conversation.</p>
+<div style="margin-top:28px;">
+<a href="mailto:phoebegarcia@protonmail.com" style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);padding:18px 32px;color:#fff;font-family:var(--mono);font-size:1rem;text-decoration:none;letter-spacing:0.02em;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+phoebegarcia@protonmail.com →
+</a>
+<p style="margin-top:14px;font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,0.4);line-height:1.7;">We respond to all serious pilot and investment inquiries within 48 hours.<br/>Please include your organization name and program type.</p>
+</div>
+</div>
+
+</div><!-- end page-pilot -->
+
+<!-- FOOTER (shared) -->
+<footer>
+<div>
+<div class="footer-logo">PhysioSim Systems</div>
+<p style="margin-top:4px">API infrastructure for earlier clinical awareness in chronic care.</p>
+</div>
+<p><a href="mailto:phoebegarcia@protonmail.com">phoebegarcia@protonmail.com</a></p>
+<p>© 2026 PhysioSim Systems, Inc. · <a href="https://physiosim.com" style="color:var(--green)">physiosim.com</a></p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+
+/* ── PAGE ROUTING ── */
+function showPage(id) {
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.getElementById('page-' + id).classList.add('active');
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── SOLUTION SIGNALS ── */
+document.querySelectorAll('.solution-grid')[0]?.querySelector('div:last-child div')?.innerHTML;
+
+/* ── FAQ DATA ── */
+const faqs = [
+{ q: "Does PhysioSim diagnose heart failure exacerbation?", a: "No. PhysioSim does not diagnose and does not make clinical decisions. It flags persistent deviations from an individualized baseline to support earlier clinical awareness. All alerts require care team review before any patient action." },
+{ q: "Who receives alerts?", a: "Alerts are designed to route to nurses or care coordinators as first-line reviewers. Escalation to a physician happens only when the care team determines it's clinically warranted." },
+{ q: "What data sources can you use?", a: "Longitudinal patient data from EHRs, remote monitoring tools, wearables, and clinical data streams. Source and signal availability are partner-dependent." },
+{ q: "How do you reduce alert fatigue?", a: "By emphasizing persistent, multi-signal deviation over transient noise, and providing concise, explainable rationale. The goal is fewer, higher-signal alerts — not more." },
+{ q: "Do we need a new dashboard?", a: "No. PhysioSim is built as an infrastructure layer that integrates into existing tools and queues. We don't require a new standalone application." },
+{ q: "Is the demo real patient data?", a: "No. The public demo uses sample, illustrative data only. No real patient information is shown anywhere on this site." },
+{ q: "Is your API publicly available?", a: "No. API access is provided to approved partners and pilot sites only. We do not expose raw endpoints publicly." },
+{ q: "Do we need full HIPAA compliance before testing?", a: "Requirements depend on whether real patient data is used and the deployment context. De-identified retrospective data can often be used for initial evaluation. We assess compliance requirements per pilot." },
+{ q: "Could this become a regulated medical device?", a: "It could, depending on claims and intended use. We currently position as risk detection / decision support (not diagnosis or treatment recommendation) to manage early regulatory burden, and will validate via interviews, retrospective analysis, then shadow-mode pilots." },
+{ q: "We already have RPM — what's new?", a: "Most RPM programs still use static, population-level thresholds. PhysioSim builds individualized baselines, detects multi-signal persistent deviation, and reduces noise — complementing existing RPM infrastructure rather than replacing it." }
+];
+
+const faqList = document.getElementById('faqList');
+faqs.forEach((f, i) => {
+faqList.innerHTML += `
+<div class="faq-item">
+<div class="faq-q" onclick="toggleFaq(${i})" id="fq${i}">
+${f.q} <span>+</span>
+</div>
+<div class="faq-a" id="fa${i}"><p>${f.a}</p></div>
+</div>`;
+});
+
+function toggleFaq(i) {
+const q = document.getElementById('fq' + i);
+const a = document.getElementById('fa' + i);
+q.classList.toggle('open');
+a.classList.toggle('open');
+}
+
+/* ── DEMO ── */
+let demoRan = false;
+let chart = null;
+
+function makeChart(data, alert) {
+const ctx = document.getElementById('trendChart')?.getContext('2d');
+if (!ctx) return;
+if (chart) chart.destroy();
+const labels = Array.from({length:14}, (_,i) => `D-${13-i}`);
+chart = new Chart(ctx, {
+type: 'line',
+data: {
+labels,
+datasets: [
+{
+label: 'Sample Weight',
+data,
+borderColor: alert ? '#c0392b' : '#0d5c32',
+backgroundColor: alert ? 'rgba(192,57,43,0.06)' : 'rgba(13,92,50,0.06)',
+borderWidth: 2, pointRadius: 2, tension: 0.4, fill: true
+},
+{
+label: 'Individual Baseline',
+data: Array(14).fill(83.1),
+borderColor: 'rgba(13,92,50,0.3)', borderDash:[5,5],
+borderWidth:1, pointRadius:0, fill:false
+}
+]
+},
+options: {
+responsive:true, animation:{duration:1000},
+plugins:{legend:{labels:{color:'#7a9282',font:{family:'IBM Plex Mono',size:10},boxWidth:12}}},
+scales:{
+x:{ticks:{color:'#7a9282',font:{family:'IBM Plex Mono',size:9}},grid:{color:'rgba(0,0,0,0.04)'}},
+y:{ticks:{color:'#7a9282',font:{family:'IBM Plex Mono',size:9}},grid:{color:'rgba(0,0,0,0.04)'}}
+}
+}
+});
+}
+
+makeChart([83.1,83.0,83.2,83.1,83.3,83.2,83.1,83.2,83.0,83.1,83.2,83.1,83.2,83.1], false);
+
+function runDemo() {
+if (demoRan) return;
+demoRan = true;
+const btn = document.getElementById('runBtn');
+const st = document.getElementById('term-status');
+btn.disabled = true;
+btn.textContent = '⟳ Processing...';
+st.textContent = '// Connecting...'; st.style.color='#fbbf24';
+setTimeout(()=>{ st.textContent='// Building individualized baseline model...'; }, 700);
+setTimeout(()=>{ st.textContent='// Scoring multi-signal deviation...'; }, 1500);
+setTimeout(()=>{ showResult(); }, 2400);
+}
+
+function showResult() {
+const terminal = document.getElementById('terminal');
+const st = document.getElementById('term-status');
+const btn = document.getElementById('runBtn');
+st.textContent = '// 200 OK'; st.style.color='#a8e6c3';
+btn.textContent = '✓ Complete';
+terminal.insertAdjacentHTML('beforeend', `
+<div class="t-line">&nbsp;</div>
+<div class="t-line t-comment">// ← Sample Response</div>
+<div class="t-line">{</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"risk_level"</span>: <span class="t-err">"HIGH"</span>,</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"deviation_score"</span>: <span class="t-err">0.83</span>,</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"signals_flagged"</span>: [</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"weight_gain_sustained_6d"</span>,</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"hr_elevated_5d"</span>,</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"activity_decline_7d"</span>,</div>
+<div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"dyspnea_reported"</span></div>
+<div class="t-line">&nbsp;&nbsp;],</div>
+<div class="t-line">&nbsp;&nbsp;<span class="t-key">"suggested_workflow"</span>: <span class="t-str">"nurse_review_first"</span></div>
+<div class="t-line">}</div>
+`);
+setTimeout(()=>{
+['wt','hr','steps','sym'].forEach((k,i)=>{
+setTimeout(()=>{
+const el = document.getElementById('sig-'+k);
+const val = document.getElementById('val-'+k);
+const fill = document.getElementById('fill-'+k);
+if(k==='wt'||k==='hr'){el.classList.add('alert');val.classList.remove('ok');val.classList.add('danger');fill.style.width='82%';fill.style.background='var(--red)';}
+else{el.classList.add('warn');val.classList.add('warn');fill.style.width='60%';fill.style.background='var(--yellow)';}
+}, i*200);
+});
+setTimeout(()=>{
+document.getElementById('statusBadge').textContent='⚠ HIGH RISK';
+document.getElementById('statusBadge').className='badge badge-high';
+}, 900);
+setTimeout(()=>{ document.getElementById('alertPanel').classList.add('show'); }, 1100);
+setTimeout(()=>{ makeChart([83.1,83.0,83.2,83.1,83.2,83.4,83.7,84.1,84.4,84.7,85.0,85.1,85.2,85.2], true); }, 1300);
+}, 300);
+}
+
+/* ── CONTACT FORM ── */
+function submitContact() {
+const name = document.getElementById('cf-name').value;
+const email = document.getElementById('cf-email').value;
+if (!name || !email || !email.includes('@')) { alert('Please fill in your name and email.'); return; }
+document.getElementById('cf-confirm').style.display = 'block';
+document.querySelector('.contact-form button').style.display = 'none';
+}
+
+</script>
+</body>
+</html>
