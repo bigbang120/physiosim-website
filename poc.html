@@ -580,16 +580,14 @@
 <div class="hero">
   <div class="hero-label animate animate-1">
     <span class="pulse-dot"></span>
-    Proof of Concept · PhysioNet Open Data · API v1.3
+    Proof of Concept · Real Vitals + PhysioNet Open Data · API v1.3
   </div>
   <h1 class="animate animate-2">
     Real physiological data.<br>
     <em>Real API output.</em>
   </h1>
   <p class="hero-sub animate animate-3">
-    We ran PhysioSim's API against an open-source longitudinal physiological dataset from PhysioNet — 
-    242,815 observations across ECG, plethysmogram, temperature, and accelerometer signals. 
-    Below is the actual output.
+    We ran PhysioSim's API against two data types: real daily vitals from actual individuals (smartwatch-style readings), and a high-frequency ECG/waveform dataset from PhysioNet — 242,815 observations. Different formats, same engine. Below is the actual output.
   </p>
   <div class="hero-meta animate animate-4">
     <div class="hero-stat">
@@ -619,10 +617,275 @@
   PhysioSim does not diagnose and does not make clinical decisions.
 </div>
 
-<!-- WHAT WE RAN -->
+<!-- SMARTWATCH / DAILY VITALS DATASETS -->
 <div class="section">
-  <div class="section-label">// Step 1 — Input data</div>
-  <h2 class="section-title">What we <em>fed</em> the API</h2>
+  <div class="section-label">// Dataset A — Real daily vitals · Two individuals</div>
+  <h2 class="section-title">PhysioSim on <em>real smartwatch readings</em></h2>
+  <p style="color:#B8B8B8;font-size:0.92rem;max-width:660px;line-height:1.75;margin-bottom:8px;">
+    PhysioSim was run against actual daily vital sign readings collected from two real individuals — 
+    the kind of data a smartwatch or consumer health device produces. 
+    Two people, two datasets, different signals. Same API, same individualized baseline engine.
+  </p>
+  <p style="color:#777;font-family:var(--mono);font-size:0.72rem;margin-bottom:40px;">
+    ⚠ Data collected with consent for development purposes. De-identified. For research and pilot use only.
+  </p>
+
+  <!-- Dataset 1 — Uncle -->
+  <div style="margin-bottom:48px;">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <div style="font-family:var(--mono);font-size:0.72rem;color:var(--green);letter-spacing:0.15em;text-transform:uppercase;">Dataset — CA148D39</div>
+      <div style="height:1px;flex:1;background:#1A1A1A;"></div>
+      <div style="font-family:var(--mono);font-size:0.72rem;color:#555;">Individual A · 4 signals · 23 observations</div>
+    </div>
+
+    <div class="risk-block" style="margin-top:0;margin-bottom:24px;">
+      <div class="risk-level" style="font-size:2.8rem;min-width:130px;">
+        MEDIUM
+        <small>Risk level</small>
+      </div>
+      <div class="risk-rationale">
+        <h4>API output — rationale</h4>
+        <p>Repeated or multi-signal deviation detected across 3 concurrent signals, 4 multi-signal deviation days. 
+           Trend acceleration flagged in systolic and diastolic BP. 
+           SpO₂ deviation detected — monitoring for rising oxygen requirement indicated. 
+           Pattern warrants monitoring; routed to Tier 2 remote monitoring command center within 24h.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:24px;">
+      <div style="background:#111;border:1px solid #1A1A1A;padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#777;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Observations</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--white);line-height:1;">23</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#555;margin-top:4px;">total analyzed</div>
+      </div>
+      <div style="background:#111;border:1px solid #1A1A1A;padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#777;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Deviations</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--amber);line-height:1;">9</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#555;margin-top:4px;">39.1% of readings</div>
+      </div>
+      <div style="background:#111;border:1px solid #1A1A1A;padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#777;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Signals</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--white);line-height:1;">4</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#555;margin-top:4px;">HR · SpO₂ · SBP · DBP</div>
+      </div>
+      <div style="background:#0D1A12;border:1px solid var(--green-d);padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:var(--green);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Routing</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--green);line-height:1;">Tier 2</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#4A9A6A;margin-top:4px;">within 24h</div>
+      </div>
+    </div>
+
+    <table class="signal-table">
+      <thead>
+        <tr>
+          <th>Signal</th>
+          <th>Individual Median</th>
+          <th>IQR</th>
+          <th>Mean</th>
+          <th>Std Dev</th>
+          <th>Triggers</th>
+          <th>Accelerating?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Resting Heart Rate</td>
+          <td>70.0 bpm</td>
+          <td>6.0 bpm</td>
+          <td>72.6 bpm</td>
+          <td>4.5 bpm</td>
+          <td><span class="badge badge-gray">1</span></td>
+          <td><span class="badge badge-gray">No</span></td>
+        </tr>
+        <tr>
+          <td>SpO₂</td>
+          <td>98.0%</td>
+          <td>1.5%</td>
+          <td>97.6%</td>
+          <td>1.5%</td>
+          <td><span class="badge badge-amber">3</span></td>
+          <td><span class="badge badge-gray">No</span></td>
+        </tr>
+        <tr>
+          <td>Systolic BP</td>
+          <td>123.0 mmHg</td>
+          <td>6.5 mmHg</td>
+          <td>119.3 mmHg</td>
+          <td>7.2 mmHg</td>
+          <td><span class="badge badge-amber">4</span></td>
+          <td><span class="badge badge-red">YES ↑</span></td>
+        </tr>
+        <tr>
+          <td>Diastolic BP</td>
+          <td>84.0 mmHg</td>
+          <td>6.0 mmHg</td>
+          <td>80.0 mmHg</td>
+          <td>6.9 mmHg</td>
+          <td><span class="badge badge-red">6</span></td>
+          <td><span class="badge badge-red">YES ↑</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:24px;background:#0D0D0D;border:1px solid #1A1A1A;padding:28px 32px;">
+      <div style="font-family:var(--mono);font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:20px;">Signal trends vs. individual baseline — Dataset CA148D39</div>
+
+      <div style="margin-bottom:24px;">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:#777;margin-bottom:6px;">Resting Heart Rate (bpm) — baseline 70.0</div>
+        <svg viewBox="0 0 700 60" style="width:100%;height:60px;">
+          <defs><linearGradient id="sw1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00A550" stop-opacity="0.15"/><stop offset="100%" stop-color="#00A550" stop-opacity="0.04"/></linearGradient></defs>
+          <rect x="0" y="15" width="700" height="24" fill="url(#sw1)"/>
+          <line x1="0" y1="27" x2="700" y2="27" stroke="#00A550" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+          <polyline points="0,22 70,8 140,22 210,38 280,30 350,42 420,18 490,30 560,38 630,22 700,28" fill="none" stroke="#00A550" stroke-width="1.5" opacity="0.85"/>
+        </svg>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:#777;margin-bottom:6px;">SpO₂ (%) — baseline 98.0 · <span style="color:var(--amber)">3 deviations</span></div>
+        <svg viewBox="0 0 700 60" style="width:100%;height:60px;">
+          <defs><linearGradient id="sw2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00A550" stop-opacity="0.15"/><stop offset="100%" stop-color="#00A550" stop-opacity="0.04"/></linearGradient></defs>
+          <rect x="0" y="14" width="700" height="22" fill="url(#sw2)"/>
+          <line x1="0" y1="25" x2="700" y2="25" stroke="#00A550" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+          <polyline points="0,22 70,38 140,18 210,22 280,45 350,20 420,22 490,48 560,20 630,18 700,10" fill="none" stroke="#00A550" stroke-width="1.5" opacity="0.85"/>
+          <circle cx="280" cy="45" r="3" fill="#D97706" opacity="0.8"/>
+          <circle cx="490" cy="48" r="3" fill="#D97706" opacity="0.8"/>
+          <circle cx="700" cy="10" r="3" fill="#D97706" opacity="0.8"/>
+        </svg>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:#777;margin-bottom:6px;">Systolic BP (mmHg) — baseline 123.0 · <span style="color:var(--amber)">4 deviations · accelerating ↑</span></div>
+        <svg viewBox="0 0 700 60" style="width:100%;height:60px;">
+          <defs><linearGradient id="sw3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00A550" stop-opacity="0.15"/><stop offset="100%" stop-color="#00A550" stop-opacity="0.04"/></linearGradient></defs>
+          <rect x="0" y="16" width="700" height="20" fill="url(#sw3)"/>
+          <line x1="0" y1="26" x2="700" y2="26" stroke="#00A550" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+          <polyline points="0,18 117,8 233,42 350,20 467,35 583,48 700,52" fill="none" stroke="#00A550" stroke-width="1.5" opacity="0.85"/>
+          <circle cx="117" cy="8" r="3" fill="#D97706" opacity="0.8"/>
+          <circle cx="583" cy="48" r="3" fill="#D97706" opacity="0.8"/>
+          <circle cx="700" cy="52" r="3" fill="#DC2626" opacity="0.8"/>
+        </svg>
+      </div>
+
+      <div>
+        <div style="font-family:var(--mono);font-size:0.7rem;color:#777;margin-bottom:6px;">Diastolic BP (mmHg) — baseline 84.0 · <span style="color:var(--red)">6 deviations · accelerating ↑</span></div>
+        <svg viewBox="0 0 700 60" style="width:100%;height:60px;">
+          <defs><linearGradient id="sw4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00A550" stop-opacity="0.15"/><stop offset="100%" stop-color="#00A550" stop-opacity="0.04"/></linearGradient></defs>
+          <rect x="0" y="16" width="700" height="20" fill="url(#sw4)"/>
+          <line x1="0" y1="26" x2="700" y2="26" stroke="#00A550" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+          <polyline points="0,20 70,10 140,38 210,14 280,8 350,42 420,12 490,18 560,46 630,14 700,50" fill="none" stroke="#00A550" stroke-width="1.5" opacity="0.85"/>
+          <circle cx="70" cy="10" r="3" fill="#D97706" opacity="0.8"/>
+          <circle cx="280" cy="8" r="3" fill="#D97706" opacity="0.8"/>
+          <circle cx="560" cy="46" r="3" fill="#DC2626" opacity="0.8"/>
+          <circle cx="700" cy="50" r="3" fill="#DC2626" opacity="0.8"/>
+        </svg>
+      </div>
+      <p style="color:#555;font-family:var(--mono);font-size:0.65rem;margin-top:14px;">Green line = observed · Dashed = individual baseline median · Shaded = IQR · Amber/red dots = flagged deviations</p>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div style="height:1px;background:#1A1A1A;margin:16px 0 48px;"></div>
+
+  <!-- Dataset 2 -->
+  <div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <div style="font-family:var(--mono);font-size:0.72rem;color:var(--green);letter-spacing:0.15em;text-transform:uppercase;">Dataset — 97DBAAA9</div>
+      <div style="height:1px;flex:1;background:#1A1A1A;"></div>
+      <div style="font-family:var(--mono);font-size:0.72rem;color:#555;">Individual B · 1 signal · 25 observations</div>
+    </div>
+
+    <div class="risk-block" style="margin-top:0;margin-bottom:24px;">
+      <div class="risk-level" style="font-size:2.8rem;min-width:130px;">
+        MEDIUM
+        <small>Risk level</small>
+      </div>
+      <div class="risk-rationale">
+        <h4>API output — rationale</h4>
+        <p>Repeated deviation pattern detected in resting heart rate despite low trigger count. 
+           Trend acceleration flagged — rate of change in HR is increasing. 
+           Tachycardia is nonspecific; HR elevation may reflect pain, anxiety, fever, dehydration, or stress. 
+           Routed to Tier 2 remote monitoring command center for review within 24h.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:24px;">
+      <div style="background:#111;border:1px solid #1A1A1A;padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#777;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Observations</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--white);line-height:1;">25</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#555;margin-top:4px;">total analyzed</div>
+      </div>
+      <div style="background:#111;border:1px solid #1A1A1A;padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#777;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Deviations</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--amber);line-height:1;">1</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#555;margin-top:4px;">4.0% of readings</div>
+      </div>
+      <div style="background:#111;border:1px solid #1A1A1A;padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#777;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Signal</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--white);line-height:1;">1</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#555;margin-top:4px;">Resting HR</div>
+      </div>
+      <div style="background:#0D1A12;border:1px solid var(--green-d);padding:20px 22px;">
+        <div style="font-family:var(--mono);font-size:0.68rem;color:var(--green);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Routing</div>
+        <div style="font-family:var(--serif);font-size:1.8rem;color:var(--green);line-height:1;">Tier 2</div>
+        <div style="font-family:var(--mono);font-size:0.68rem;color:#4A9A6A;margin-top:4px;">within 24h</div>
+      </div>
+    </div>
+
+    <table class="signal-table">
+      <thead>
+        <tr>
+          <th>Signal</th>
+          <th>Individual Median</th>
+          <th>IQR</th>
+          <th>Mean</th>
+          <th>Std Dev</th>
+          <th>Triggers</th>
+          <th>Accelerating?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Resting Heart Rate</td>
+          <td>73.0 bpm</td>
+          <td>3.5 bpm</td>
+          <td>73.0 bpm</td>
+          <td>4.6 bpm</td>
+          <td><span class="badge badge-amber">1</span></td>
+          <td><span class="badge badge-red">YES ↑</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:24px;background:#0D0D0D;border:1px solid #1A1A1A;padding:28px 32px;">
+      <div style="font-family:var(--mono);font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:16px;">Signal trend vs. individual baseline — Dataset 97DBAAA9</div>
+      <div style="font-family:var(--mono);font-size:0.7rem;color:#777;margin-bottom:6px;">HR (bpm) — baseline 73.0 · <span style="color:var(--red)">acceleration detected ↑</span></div>
+      <svg viewBox="0 0 700 80" style="width:100%;height:80px;">
+        <defs><linearGradient id="sw5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00A550" stop-opacity="0.15"/><stop offset="100%" stop-color="#00A550" stop-opacity="0.04"/></linearGradient></defs>
+        <rect x="0" y="26" width="700" height="22" fill="url(#sw5)"/>
+        <line x1="0" y1="37" x2="700" y2="37" stroke="#00A550" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+        <polyline points="0,35 58,50 117,38 175,35 233,33 292,30 350,35 408,32 467,28 525,10 583,32 641,38 700,35" fill="none" stroke="#00A550" stroke-width="1.5" opacity="0.85"/>
+        <circle cx="525" cy="10" r="3.5" fill="#D97706" opacity="0.9"/>
+      </svg>
+      <p style="color:#555;font-family:var(--mono);font-size:0.65rem;margin-top:12px;">Green line = observed · Dashed = individual baseline (73.0 bpm) · Shaded = IQR · Amber dot = flagged deviation</p>
+    </div>
+  </div>
+
+  <!-- What these demonstrate -->
+  <div style="margin-top:40px;padding:24px 28px;background:#0D1A0D;border:1px solid var(--green-d);border-left:3px solid var(--green);">
+    <div style="font-family:var(--mono);font-size:0.72rem;color:var(--green);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px;">What these datasets demonstrate</div>
+    <p style="font-size:0.88rem;color:#CCC;line-height:1.75;max-width:700px;">
+      Two real individuals. Two different signal sets. The same individualized baseline engine 
+      assessed each against <em style="color:#ddd">their own physiological normal</em> — not a population average. 
+      Sparse daily readings, real deviation patterns, real alert routing. 
+      Below, the same engine processes 242,815 high-frequency waveform observations.
+    </p>
+  </div>
+</div>
+
+<!-- DATASET B — ECG WAVEFORM (PhysioNet) -->
+<div class="section">
+  <div class="section-label">// Dataset B — PhysioNet ECG waveform · Step 1 of 5 — Input data</div>
+  <h2 class="section-title">High-frequency waveform — <em>what we fed the API</em></h2>
 
   <div class="data-card">
     <div class="data-card-label">Data source</div>
@@ -657,7 +920,7 @@
 
 <!-- BASELINE RESULTS -->
 <div class="section">
-  <div class="section-label">// Step 2 — Individualized baseline</div>
+  <div class="section-label">// Dataset B · Step 2 — Individualized baseline</div>
   <h2 class="section-title">What PhysioSim learned about <em>this individual</em></h2>
   <p style="color:#B8B8B8;font-size:0.92rem;max-width:640px;line-height:1.75;margin-bottom:8px;">
     Before flagging anything, PhysioSim builds a statistical baseline from the first 80% of observations — 
@@ -726,7 +989,7 @@
 
 <!-- CHART SECTION -->
 <div class="section">
-  <div class="section-label">// Step 3 — Signal trend vs baseline</div>
+  <div class="section-label">// Dataset B · Step 3 — Signal trend vs baseline</div>
   <h2 class="section-title">Temperature signal — <em>observed vs baseline</em></h2>
   <p style="color:#B8B8B8;font-size:0.92rem;max-width:640px;line-height:1.75;margin-bottom:8px;">
     The chart below shows actual temperature values from the dataset versus the 
@@ -787,7 +1050,7 @@
 
 <!-- WAVELET ANALYSIS -->
 <div class="section">
-  <div class="section-label">// Step 4 — Wavelet deviation detection</div>
+  <div class="section-label">// Dataset B · Step 4 — Wavelet deviation detection</div>
   <h2 class="section-title">Frequency-domain analysis — <em>what the wavelet found</em></h2>
   <p style="color:#B8B8B8;font-size:0.92rem;max-width:640px;line-height:1.75;margin-bottom:32px;">
     PhysioSim applies Discrete Wavelet Transform (db4 Daubechies) to detect 
@@ -856,7 +1119,7 @@
 
 <!-- RISK OUTPUT -->
 <div class="section">
-  <div class="section-label">// Step 5 — Risk stratification output</div>
+  <div class="section-label">// Dataset B · Step 5 — Risk stratification output</div>
   <h2 class="section-title">What the API <em>returned</em></h2>
 
   <div class="risk-block">
@@ -947,12 +1210,7 @@
 
   <div style="margin-top:32px;padding:20px 24px;background:#0D1A0D;border:1px solid var(--green-d);border-left:3px solid var(--green);">
     <p style="font-family:var(--mono);font-size:0.78rem;color:#D0D0D0;line-height:1.7;">
-      <span style="color:var(--green)">Important context:</span> This proof of concept used 
-      high-frequency waveform data (125Hz ECG/PPG) — a technically demanding input type. 
-      For a clinical chronic care pilot, we would use daily RPM readings (heart rate, weight, SpO₂, 
-      blood pressure) — a simpler, more clinically interpretable data format 
-      where our individualized baseline approach is most actionable. 
-      This demonstration shows the engine can handle waveform data as well.
+      <span style="color:var(--green)">Important context:</span> This waveform dataset (125Hz ICU data) represents the most technically demanding input PhysioSim handles. The same engine works equally well on sparse daily vitals — as shown above with the smartwatch datasets. The individualized baseline approach applies regardless of data density or signal type.
     </p>
   </div>
 </div>
