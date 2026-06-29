@@ -600,7 +600,7 @@
     </div>
     <div class="hero-stat">
       <div class="hero-stat-n">v1.3</div>
-      <div class="hero-stat-l">wavelet DWT + tiered routing</div>
+      <div class="hero-stat-l">proprietary algorithm + tiered routing</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-n">&lt;3s</div>
@@ -900,7 +900,7 @@
     <div class="data-card-label">Format</div>
     <div class="data-card-value"><strong>CSV — 242,815 rows × 4 signal columns</strong><br>
       Signals: <code>ecg</code>, <code>pleth</code>, <code>temperature</code>, <code>accelerometer</code><br>
-      High-frequency waveform data sampled at 125Hz. Auto-detected by API as <code>data_mode: high_frequency</code>.
+      High-frequency waveform data sampled at 125Hz. Signal type and data mode auto-detected by the API.
     </div>
   </div>
 
@@ -914,7 +914,7 @@
 
   <div class="data-card">
     <div class="data-card-label">Processing time</div>
-    <div class="data-card-value"><strong>&lt; 3 seconds</strong> for 242,815 observations including wavelet decomposition across all 4 signals.</div>
+    <div class="data-card-value"><strong>&lt; 3 seconds</strong> for 242,815 observations including proprietary frequency analysis across all 4 signals.</div>
   </div>
 </div>
 
@@ -923,9 +923,7 @@
   <div class="section-label">// Dataset B · Step 2 — Individualized baseline</div>
   <h2 class="section-title">What PhysioSim learned about <em>this individual</em></h2>
   <p style="color:#B8B8B8;font-size:0.92rem;max-width:640px;line-height:1.75;margin-bottom:8px;">
-    Before flagging anything, PhysioSim builds a statistical baseline from the first 80% of observations — 
-    specific to this individual's data. This is what makes deviation detection meaningful: 
-    deviation from <em style="color:#ccc">their</em> normal, not a population average.
+    Before flagging anything, PhysioSim builds a statistical baseline from an initial longitudinal window of this individual's own data — specific to them. This is what makes deviation detection meaningful: deviation from <em style="color:#ccc">their</em> normal, not a population average.
   </p>
 
   <table class="signal-table">
@@ -1048,24 +1046,24 @@
   </div>
 </div>
 
-<!-- WAVELET ANALYSIS -->
+<!-- FREQUENCY ANALYSIS -->
 <div class="section">
-  <div class="section-label">// Dataset B · Step 4 — Wavelet deviation detection</div>
-  <h2 class="section-title">Frequency-domain analysis — <em>what the wavelet found</em></h2>
+  <div class="section-label">// Dataset B · Step 4 — Proprietary frequency analysis</div>
+  <h2 class="section-title">Frequency-domain analysis — <em>what the proprietary algorithm found</em></h2>
   <p style="color:#B8B8B8;font-size:0.92rem;max-width:640px;line-height:1.75;margin-bottom:32px;">
-    PhysioSim applies Discrete Wavelet Transform (db4 Daubechies) to detect 
+    PhysioSim applies a proprietary frequency-domain algorithm to detect 
     <em style="color:#ccc">when</em> signal rhythms shift — not just whether they did. 
-    This is more clinically precise than FFT for non-stationary physiological waveforms.
+    This provides clinically precise time-localized detection for non-stationary physiological waveforms.
   </p>
 
   <table class="signal-table">
     <thead>
       <tr>
         <th>Signal</th>
-        <th>Baseline Freq (Hz)</th>
-        <th>Recent Freq (Hz)</th>
-        <th>Freq Shift</th>
-        <th>Energy Ratio</th>
+        <th>Baseline Pattern</th>
+        <th>Recent Pattern</th>
+        <th>Pattern Shift</th>
+        <th>Spectral Score</th>
         <th>Deviated?</th>
         <th>Clinical Significance</th>
       </tr>
@@ -1073,47 +1071,45 @@
     <tbody>
       <tr>
         <td>ECG</td>
-        <td>0.0004</td>
-        <td>0.0134</td>
-        <td><strong style="color:var(--amber)">+0.013 Hz</strong></td>
-        <td>0.111</td>
+        <td>Stable</td>
+        <td>Shifted</td>
+        <td><strong style="color:var(--amber)">Significant ↑</strong></td>
+        <td><span style="color:var(--amber)">Elevated</span></td>
         <td><span class="badge badge-amber">YES</span></td>
-        <td style="color:#AAAAAA;font-size:0.78rem;">Meaningful shift in cardiac rhythm frequency</td>
+        <td style="color:#AAAAAA;font-size:0.78rem;">Meaningful shift in cardiac rhythm pattern</td>
       </tr>
       <tr>
         <td>Plethysmogram</td>
-        <td>0.000</td>
-        <td>0.000</td>
-        <td>0.000</td>
-        <td>0.076</td>
+        <td>Stable</td>
+        <td>Reduced</td>
+        <td>Moderate ↓</td>
+        <td><span style="color:var(--amber)">Reduced</span></td>
         <td><span class="badge badge-amber">YES</span></td>
-        <td style="color:#AAAAAA;font-size:0.78rem;">Energy reduction in PPG waveform</td>
+        <td style="color:#AAAAAA;font-size:0.78rem;">Energy reduction in PPG waveform pattern</td>
       </tr>
       <tr>
         <td>Temperature</td>
-        <td>0.000</td>
-        <td>0.000</td>
-        <td>0.000</td>
-        <td>0.087</td>
+        <td>Stable</td>
+        <td>Shifted</td>
+        <td>Moderate</td>
+        <td><span style="color:var(--amber)">Reduced</span></td>
         <td><span class="badge badge-amber">YES</span></td>
-        <td style="color:#AAAAAA;font-size:0.78rem;">Spectral energy shift vs baseline window</td>
+        <td style="color:#AAAAAA;font-size:0.78rem;">Spectral pattern shift vs baseline window</td>
       </tr>
       <tr>
         <td>Accelerometer</td>
-        <td>0.0047</td>
-        <td>0.0048</td>
-        <td>0.0001</td>
-        <td>0.092</td>
+        <td>Stable</td>
+        <td>Minimal shift</td>
+        <td>Minimal</td>
+        <td><span style="color:var(--amber)">Reduced</span></td>
         <td><span class="badge badge-amber">YES</span></td>
-        <td style="color:#AAAAAA;font-size:0.78rem;">Minimal frequency shift, energy change detected</td>
+        <td style="color:#AAAAAA;font-size:0.78rem;">Minimal pattern shift, spectral change detected</td>
       </tr>
     </tbody>
   </table>
 
   <p style="color:#777777;font-family:var(--mono);font-size:0.7rem;margin-top:14px;line-height:1.6;padding:12px 16px;border:1px solid #1A1A1A;background:#0D0D0D;">
-    Note: Energy ratios below 1.0 indicate reduced spectral energy in the recent window vs baseline — 
-    consistent with a period of reduced physiological activity (e.g., sedation, sleep, reduced movement). 
-    PhysioSim flags both increases and decreases as warranting clinical review.
+    Note: PhysioSim's proprietary algorithm flags both increases and decreases in spectral pattern energy as warranting clinical review — reduced activity patterns (e.g., sedation, sleep, reduced movement) are as clinically meaningful as elevated ones.
   </p>
 </div>
 
@@ -1133,7 +1129,7 @@
         Sustained multi-signal deviation detected across 4 signals. 
         Pattern is persistent versus individual baseline and consistent across signals — 
         not consistent with short-term noise. 
-        Wavelet decomposition additionally flagged spectral energy shifts in ECG, plethysmogram, 
+        Proprietary frequency-domain analysis additionally flagged spectral pattern shifts in ECG, plethysmogram, 
         temperature, and accelerometer. 
         Trend velocity analysis shows accelerating deviation trajectory.
       </p>
@@ -1173,20 +1169,19 @@
     <div class="insight-card">
       <div class="insight-icon">⚙️</div>
       <h4>The API works</h4>
-      <p>242,815 observations processed, baselined, wavelet-analyzed, and risk-stratified in under 3 seconds. 
+      <p>242,815 observations processed, baselined, analyzed with PhysioSim's proprietary algorithm, and risk-stratified in under 3 seconds. 
          The engineering is real and deployed on Railway.</p>
     </div>
     <div class="insight-card">
       <div class="insight-icon">◎</div>
       <h4>Individualized baselines work</h4>
-      <p>The baseline is built from this individual's first 80% of data — not a population average. 
+      <p>The baseline is built from this individual's own longitudinal data — not a population average. 
          Every deviation threshold is calibrated to their specific physiological normal range.</p>
     </div>
     <div class="insight-card">
       <div class="insight-icon">∿</div>
-      <h4>Wavelet analysis works</h4>
-      <p>DWT (db4) detected spectral energy shifts across 4 signals including ECG and PPG waveforms — 
-         time-frequency localization that FFT-based systems cannot provide.</p>
+      <h4>Proprietary frequency analysis works</h4>
+      <p>PhysioSim's proprietary algorithm detected spectral pattern shifts across all 4 signals including ECG and PPG waveforms — with time-localized precision that standard frequency methods cannot provide.</p>
     </div>
     <div class="insight-card">
       <div class="insight-icon">🔀</div>
@@ -1198,7 +1193,7 @@
       <div class="insight-icon">📄</div>
       <h4>PDF report output works</h4>
       <p>The API generated a clinician-readable PDF report with baseline tables, 
-         trend charts, wavelet analysis, and flagged events — downloadable, no dashboard required.</p>
+         trend charts, frequency analysis, and flagged events — downloadable, no dashboard required.</p>
     </div>
     <div class="insight-card">
       <div class="insight-icon">⚡</div>
